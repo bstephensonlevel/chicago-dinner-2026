@@ -69,6 +69,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       padding: 16px 48px;
       background: #000;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -77,9 +78,12 @@
     .nav-logo {
       height: 44px;
       width: auto;
+      flex-shrink: 0;
     }
 
     .nav-cta {
+      flex-shrink: 0;
+      white-space: nowrap;
       background: #86D5F4;
       color: #000;
       font-family: "Inter Tight", sans-serif;
@@ -845,7 +849,17 @@
     /* RESPONSIVE */
     @media (max-width: 900px) {
       .site-nav {
-        padding: 14px 20px;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+
+      .nav-logo {
+        height: 28px;
+      }
+
+      .nav-cta {
+        font-size: 12px;
+        padding: 9px 14px;
       }
 
       .nav-tag {
@@ -1124,12 +1138,37 @@
         gap: 40px;
       }
     }
+
+    /* Small phones: the wordmark and the CTA have to share about 290px */
+    @media (max-width: 380px) {
+      .site-nav {
+        gap: 10px;
+        padding: 10px 14px;
+      }
+
+      .nav-logo {
+        height: 22px;
+      }
+
+      .nav-cta {
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        padding: 8px 11px;
+      }
+
+      /* The 120px time column overflows a 320px viewport */
+      .tl-item {
+        grid-template-columns: 84px 1fr;
+        gap: 14px;
+      }
+    }
     /* HubSpot native form embed inside the modal */
     .hs-form-frame {
       padding: 26px 28px 34px;
     }
 
     .hs-form-frame iframe {
+      display: block;
       width: 100% !important;
     }
 
@@ -2167,6 +2206,35 @@
         }
       });
     });
+
+    // HubSpot sizes its form iframe from inside, and it measures a few pixels
+    // short, which clips the bottom of the submit button. Add clearance each
+    // time HubSpot writes a new height, ignoring the heights we set ourselves.
+    (function () {
+      var EXTRA = 32;
+      var ours = null;
+
+      function padFrame(frame) {
+        var reported = parseInt(frame.style.height, 10);
+        if (!reported || reported < 200) return;
+        if (reported === ours) return;
+        ours = reported + EXTRA;
+        frame.style.height = ours + 'px';
+      }
+
+      var tries = 0;
+      var poll = setInterval(function () {
+        var frame = document.querySelector('.hs-form-frame iframe');
+        if (frame) {
+          clearInterval(poll);
+          padFrame(frame);
+          new MutationObserver(function () { padFrame(frame); })
+            .observe(frame, { attributes: true, attributeFilter: ['style'] });
+        } else if (++tries > 80) {
+          clearInterval(poll);
+        }
+      }, 250);
+    })();
 
     function openRsvpModal() {
       document.getElementById('rsvp-modal').style.display = 'flex';
