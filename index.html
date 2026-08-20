@@ -1164,11 +1164,12 @@
     }
     /* HubSpot native form embed inside the modal */
     .hs-form-frame {
-      padding: 26px 28px 34px;
+      padding: 26px 28px 40px;
     }
 
     .hs-form-frame iframe {
       display: block;
+      border: 0;
       width: 100% !important;
     }
 
@@ -2090,15 +2091,15 @@
     background:rgba(0,0,0,0.85);
     backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px);
-    align-items:center;justify-content:center;
+    align-items:flex-start;justify-content:center;
+    overflow-y:auto;
     padding:24px;
   ">
     <div style="
       position:relative;
       background:#fff;
       width:100%;max-width:620px;
-      max-height:90vh;
-      overflow:hidden;
+      margin:auto;
       display:flex;flex-direction:column;
     ">
       <!-- Modal header -->
@@ -2144,7 +2145,7 @@
       </div>
 
       <!-- HubSpot form (form ID c9f82d18-4d44-478f-a3b9-b3d5ec060a35, portal 297156) -->
-      <div style="overflow-y:auto;flex:1;background:#fff;">
+      <div style="background:#fff;">
         <div class="hs-form-frame" data-region="na1" data-form-id="c9f82d18-4d44-478f-a3b9-b3d5ec060a35"
           data-portal-id="297156"></div>
       </div>
@@ -2206,35 +2207,6 @@
         }
       });
     });
-
-    // HubSpot sizes its form iframe from inside, and it measures a few pixels
-    // short, which clips the bottom of the submit button. Add clearance each
-    // time HubSpot writes a new height, ignoring the heights we set ourselves.
-    (function () {
-      var EXTRA = 32;
-      var ours = null;
-
-      function padFrame(frame) {
-        var reported = parseInt(frame.style.height, 10);
-        if (!reported || reported < 200) return;
-        if (reported === ours) return;
-        ours = reported + EXTRA;
-        frame.style.height = ours + 'px';
-      }
-
-      var tries = 0;
-      var poll = setInterval(function () {
-        var frame = document.querySelector('.hs-form-frame iframe');
-        if (frame) {
-          clearInterval(poll);
-          padFrame(frame);
-          new MutationObserver(function () { padFrame(frame); })
-            .observe(frame, { attributes: true, attributeFilter: ['style'] });
-        } else if (++tries > 80) {
-          clearInterval(poll);
-        }
-      }, 250);
-    })();
 
     function openRsvpModal() {
       document.getElementById('rsvp-modal').style.display = 'flex';
